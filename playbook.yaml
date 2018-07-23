@@ -1,0 +1,10 @@
+- hosts: localhost
+  tasks:
+    - name: OpenShift login
+      command: oc login -u admin -p dynatrace --insecure-skip-tls-verify=true
+
+    - name: rollback deployment
+      command: oc rollout undo dc/ticket-monster-ui-error
+
+
+

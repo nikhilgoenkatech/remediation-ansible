@@ -1,0 +1,381 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Dynatrace auto-remediation workshop - setting up a preconfigured Ansible Tower instance",
+  "Parameters": {
+    "DynatraceTenantURL": {
+      "Description": "Your full Dynatrace Tenant URL. For SaaS it is e.g: https://<YOURTENANTID>.live.dynatrace.com. For Managed something like https://yourserver/e/abcdefgh-1234-5678-abcd-55a7265f572f",
+      "Type": "String",
+      "AllowedPattern": "https:\/\/.*"
+    },
+    "DynatraceAPIToken": {
+      "Description": "Your Dynatrace API Token. If you dont have one create one first in your Dynatrace Web UI via Settings -> Integration -> Dynatrace API",
+      "Type": "String",
+      "MinLength": "21"
+    },
+    "WorkshopPrefix": {
+      "Description": "Prefix",
+      "Type": "String",
+      "MinLength": 2
+    },
+    "DynatraceOneAgentURL": {
+      "Description": "Full Download Script URL. Go to Deploy Dynatrace -> Start Installation -> Linux and copy JUST the URL in the wget command and PASTE it here",
+      "Type": "String",
+      "AllowedPattern": "https:\/\/.*"
+    },
+    "KeyName": {
+      "Description": "Name of Existing EC2 Key Pair which we will use to launch new EC2 Instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "Must be the name of an existing Key Pair",
+      "MinLength": "1",
+      "MaxLength": "255"
+    },
+    "AnsibleTowerInstanceType": {
+      "Description": "Instance Types for the EC2 Instances for Ansible Tower. Recommendation: t2.medium or m3.medium",
+      "Type": "String",
+      "Default": "t2.medium",
+      "AllowedValues": [
+        "t2.small",
+        "t2.medium",
+        "m3.medium"
+      ]
+    },
+    "YourS3BucketName": {
+      "Description": "The name of your S3 Bucket where you uploaded Ansible Tower license. Suggested name is <yourname>-workshop. Attention: has to be in the same region as you create this stack.",
+      "Type": "String",
+      "Default": "<YOURNAME>-workshop"
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "Dynatrace"
+          },
+          "Parameters": [
+            "DynatraceTenantURL",
+            "DynatraceAPIToken",
+            "DynatraceOneAgentURL"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Deployment"
+          },
+          "Parameters": [
+            "WorkshopPrefix",
+            "KeyName",
+            "YourS3BucketName"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Ansible Tower"
+          },
+          "Parameters": [
+            "AnsibleTowerInstanceType"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "YourS3BucketName": {
+          "default": "Name of your S3 Bucket"
+        }
+      }
+    }
+  },
+  "Mappings": {
+    "AnsibleRegionMap": {
+      "us-east-1": {
+        "AMI": "ami-9f1dfce2"
+      },
+      "us-east-2": {
+        "AMI": "ami-bc5f68d9"
+      },
+      "us-west-1": {
+        "AMI": "ami-1ff6fe7f"
+      },
+      "us-west-2": {
+        "AMI": "ami-5453dc2c"
+      },
+      "ca-central-1": {
+        "AMI": "ami-bdd651d9"
+      },
+      "eu-west-1": {
+        "AMI": "ami-217e0758"
+      },
+      "eu-west-2": {
+        "AMI": "ami-55f61232"
+      },
+      "eu-central-1": {
+        "AMI": "ami-31cdae5e"
+      },
+      "ap-northeast-1": {
+        "AMI": "ami-b31963d5"
+      },
+      "ap-northeast-2": {
+        "AMI": "ami-83d974ed"
+      },
+      "ap-southeast-1": {
+        "AMI": "ami-afa3edd3"
+      },
+      "ap-southeast-2": {
+        "AMI": "ami-c9c403ab"
+      },
+      "ap-south-1": {
+        "AMI": "ami-f16f339e"
+      },
+      "sa-east-1": {
+        "AMI": "ami-bf266ed3"
+      }
+    }
+  },
+  "Resources": {
+    "DynatraceEC2InstanceProfile": {
+      "Type": "AWS::IAM::InstanceProfile",
+      "Properties": {
+        "InstanceProfileName": {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "WorkshopPrefix"
+              },
+              "DynatraceEC2InstanceProfile"
+            ]
+          ]
+        },        
+        "Path": "/",
+        "Roles": [
+          {
+            "Ref": "DynatraceEC2InstanceProfileRole"
+          }
+        ]
+      }
+    },
+    "DynatraceEC2InstanceProfileRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "RoleName": 
+        {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "WorkshopPrefix"
+              },
+              "DynatraceEC2InstanceProfileRole"
+            ]
+          ]
+        },
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ec2.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": "DynatraceEC2CodeDeployInstanceProfilePolicy",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Action": [
+                    "s3:Get*",
+                    "s3:List*"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "*"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "AnsibleSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "Enable HTTP access via port 80, 443 and SSH access.",
+        "GroupName": 
+        {
+          "Fn::Join": [
+            "-",
+            [
+              {
+                "Ref": "WorkshopPrefix"
+              },
+              "Ansible Tower Security Group"
+            ]
+          ]
+        },
+        "SecurityGroupIngress": [
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "80",
+            "ToPort": "80",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "443",
+            "ToPort": "443",
+            "CidrIp": "0.0.0.0/0"
+          },
+          {
+            "IpProtocol": "tcp",
+            "FromPort": "22",
+            "ToPort": "22",
+            "CidrIp": "0.0.0.0/0"
+          }
+        ]
+      }
+    },
+    "AnsibleTowerInstance": {
+      "Type": "AWS::EC2::Instance",
+      "Properties": {
+        "ImageId": {
+          "Fn::FindInMap": [
+            "AnsibleRegionMap",
+            {
+              "Ref": "AWS::Region"
+            },
+            "AMI"
+          ]
+        },
+        "InstanceType": {
+          "Ref": "AnsibleTowerInstanceType"
+        },
+        "IamInstanceProfile": {
+          "Ref": "DynatraceEC2InstanceProfile"
+        },
+        "KeyName": {
+          "Ref": "KeyName"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "AnsibleSecurityGroup"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "AnsibleTower"
+          }
+        ],
+        "UserData": {
+          "Fn::Base64": {
+            "Fn::Join": [
+              "",
+              [
+                "#!/bin/bash -x\n",
+                "# enter user script\n",
+                "# yum -y update\n",
+                "yum -y install nano\n",
+                "yum -y install wget\n",
+                "# INSTALL DYNATRACE ONEAGENT\n",
+                "wget --no-check-certificate -O Dynatrace-OneAgent-Linux.sh \"",
+                {
+                  "Ref": "DynatraceOneAgentURL"
+                },
+                "\"\n",
+                "sudo /bin/sh Dynatrace-OneAgent-Linux.sh APP_LOG_CONTENT_ACCESS=1\n",
+                "yum -y install jq\n",
+                "yum -y install python-pip\n",
+                "pip install ansible-tower-cli\n",
+                "awx-manage update_password --username=admin --password=dynatrace >> /tmp/cflog.txt \n",
+                "wget -O /tmp/license.txt --no-check-certificate https://s3.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".amazonaws.com/",
+                {
+                  "Ref": "YourS3BucketName"
+                },
+                "/ansible-license.txt \n",
+                "jq '{\"eula_accepted\":\"true\"} + .'  /tmp/license.txt > /tmp/newlicense.txt \n",
+                "cat /tmp/newlicense.txt >> /tmp/cflog.txt \n",
+                "service nginx restart\n",
+                "sleep 5\n",
+                "curl -X POST --header \"Authorization: Basic YWRtaW46ZHluYXRyYWNl\" --header \"Content-Type: application/json\" --data @/tmp/newlicense.txt http://localhost/api/v2/config/ --insecure --location --retry 5 -o /tmp/curllog.txt\n",
+                "mkdir /var/lib/awx/projects/remediation\n",
+                "wget -O /var/lib/awx/projects/remediation/playbook.yaml --no-check-certificate https://s3.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".amazonaws.com/",
+                {
+                  "Ref": "YourS3BucketName"
+                },
+                "/playbook.yaml \n",
+                "sed -i -e 's,DT_TENANT_URL,",
+                {
+                  "Ref": "DynatraceTenantURL"
+                },
+                ",g' /var/lib/awx/projects/remediation/playbook.yaml \n",
+                "sed -i -e 's,DT_API_TOKEN,",
+                {
+                  "Ref": "DynatraceAPIToken"
+                },
+                ",g' /var/lib/awx/projects/remediation/playbook.yaml \n",
+                "tower-cli config username admin\n",
+                "tower-cli config password dynatrace\n",
+                "tower-cli project create --name Remediation --scm-type manual --organization Default --local-path remediation \n",
+                "tower-cli job_template create --name deployment-rollback --project Remediation --playbook playbook.yaml --job-type run --credential 1 --inventory 1 --ask-variables-on-launch true \n",
+                
+                "wget https://github.com/openshift/origin/releases/download/v3.10.0-rc.0/openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit.tar.gz \n",
+                "tar -xzf openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit.tar.gz\n",
+                "mv openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit bin/ \n"
+                
+              ]
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "AnsibleTowerInstance": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "AnsibleTowerInstance",
+                "PublicDnsName"
+              ]
+            }
+          ]
+        ]
+      },
+      "Description": "The Public DNS of your Ansible Tower"
+    },
+    "AnsibleTowerJobTemplateUrl": {
+      "Value": {
+        "Fn::Join": [
+          "",
+          [
+            "https://",
+            {
+              "Fn::GetAtt": [
+                "AnsibleTowerInstance",
+                "PublicDnsName"
+              ]
+            },
+            "/#/templates/job_template/7"
+          ]
+        ]
+      },
+      "Description": "Endpoint for calling predefined playbook in Ansible Tower"
+    }
+  }
+}
