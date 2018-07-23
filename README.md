@@ -20,14 +20,16 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
 1. Login with your AWS account to the AWS console
 1. Create an S3 bucket that will hold the files needed in this example. Name could be for example: `YOURNAME-workshop`
-1. Copy your Ansible Tower license to your S3 bucket in AWS, naming **has to be**: `ansible-license.txt`
-1. Copy your `playbook.yaml` to your S3 bucket, naming **has to be**: `playbook.yaml`
+1. Upload to files to your S3 bucket.
+    - Your Ansible Tower license - naming **has to be**: `ansible-license.txt`
+    - Your playbook - naming **has to be**: `playbook.yaml`
 1. Navigate to CloudFormation
 1. Choose template and "upload to S3"
 1. Fill out the template: 
 
     ![cloudformation](./assets/cloudformation-template.png)
-1. Create!
+    
+1. Create! (and wait a couple of minutes for it to finish)
 
 ### Check your Ansible Tower installation
 
@@ -62,7 +64,6 @@ Setup a problem notification in your Dynatrace tenant:
 ## Auto-remediation workflow
 
 
-
 ### Deploy load generator
 
 ### Deploy healthy build
@@ -76,10 +77,15 @@ oc expose svc/ticket-monster-ui-v2
 
 ### Deploy broken build
 
+
 ### See auto-remediation in action
 
+
+
 ## Troubleshooting
-f
+
+After the auto-remediation, set the trigger for the automatic deployment again.
+
 ```
 $ oc set triggers dc/ticket-monster-ui-v2 --auto
 ```
