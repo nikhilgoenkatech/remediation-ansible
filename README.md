@@ -23,12 +23,13 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 1. Upload to files to your S3 bucket.
     - Your Ansible Tower license - naming **has to be**: `ansible-license.txt`
     - Your playbook - naming **has to be**: `playbook.yaml`
+1. Set permission of both files to **public** (they will be automatically downloaded later)
 1. Navigate to CloudFormation
 1. Choose template and "upload to S3"
 1. Fill out the template: 
 
     ![cloudformation](./assets/cloudformation-template.png)
-    
+
 1. Create! (and wait a couple of minutes for it to finish)
 
 ### Check your Ansible Tower installation
@@ -46,6 +47,21 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
     You should find something similar. (a project, a job template)
 
+## Create inventory in Ansible Tower
+
+```
+---
+tenantid: ton98156
+apitoken: xE0Kw6nKR26IElCgRVPn6
+commentuser: "Ansible Playbook"
+dttag: "workshop-namespace:workshop1"
+dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
+dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
+featuretoggleurl-internal-enable: ""
+featuretoggleurl-internal-disable: ""
+featuretoggleurl-microservice-enable: ""
+featuretoggleurl-microservice-disable: ""
+```
 
 
 ## Set up problem notification for Ansible Tower
