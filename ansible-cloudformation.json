@@ -144,7 +144,7 @@
               "DynatraceEC2InstanceProfile"
             ]
           ]
-        },        
+        },
         "Path": "/",
         "Roles": [
           {
@@ -156,8 +156,7 @@
     "DynatraceEC2InstanceProfileRole": {
       "Type": "AWS::IAM::Role",
       "Properties": {
-        "RoleName": 
-        {
+        "RoleName": {
           "Fn::Join": [
             "-",
             [
@@ -204,8 +203,7 @@
       "Type": "AWS::EC2::SecurityGroup",
       "Properties": {
         "GroupDescription": "Enable HTTP access via port 80, 443 and SSH access.",
-        "GroupName": 
-        {
+        "GroupName": {
           "Fn::Join": [
             "-",
             [
@@ -328,12 +326,7 @@
                 "tower-cli config username admin\n",
                 "tower-cli config password dynatrace\n",
                 "tower-cli project create --name Remediation --scm-type manual --organization Default --local-path remediation \n",
-                "tower-cli job_template create --name deployment-rollback --project Remediation --playbook playbook.yaml --job-type run --credential 1 --inventory 1 --ask-variables-on-launch true \n",
-                
-                "wget https://github.com/openshift/origin/releases/download/v3.10.0-rc.0/openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit.tar.gz \n",
-                "tar -xzf openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit.tar.gz\n",
-                "mv openshift-origin-client-tools-v3.10.0-rc.0-c20e215-linux-64bit bin/ \n"
-                
+                "tower-cli job_template create --name deployment-rollback --project Remediation --playbook playbook.yaml --job-type run --credential 1 --inventory 1 --ask-variables-on-launch true"
               ]
             ]
           }
