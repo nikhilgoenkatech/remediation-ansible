@@ -3,6 +3,12 @@
 This repo builds upon the [monolith-to-microservices on OpenShift](https://github.com/dynatrace-innovationlab/monolith-to-microservice-openshift/) repository which uses TicketMonster as its sample application.
 
 
+**Remediation**
+
+The remediation scenario is as follows: Assuming we have a healthy build in production (tm-ui-v2, backend-v2, orders-service) we are switching the *feature flag* to route new traffic to the new orders-service. In our demo, the orders service will slow down the booking process. Rolling back the service won't solve the issue, instead we have to turn of the feature flag. This will be automatically done by the *remediaton action* link in the deployment description for enabling the feature flag. Please note that enabling the feature flag has to be done via a deployment to let Dyntrace know of this action.
+
+
+
 ## Define remediaton actions as playbook
 
 In ```playbook.yaml``` all remediation action should be defined. This will be the file that comprises all tasks that can be used for remediation.
@@ -82,20 +88,16 @@ Setup a problem notification in your Dynatrace tenant:
 
 ### Deploy load generator
 
-### Deploy healthy build
+### Activate / Deploy broken build
 
-Deploy image and expose service
 
-```
-oc new-app jetzlstorfer/ticket-monster-ui-v2:healthy
-oc expose svc/ticket-monster-ui-v2
-```
+set environment variables:
 
-### Deploy broken build
-
+oc set env dc/orders-service ORDER_SERVICE_ERROR_TYPE=slowdown 
 
 ### See auto-remediation in action
 
+watch and see
 
 
 ## Troubleshooting
