@@ -1,10 +1,124 @@
+---
 - hosts: localhost
   tasks:
-    - name: OpenShift login
-      command: oc login -u admin -p dynatrace --insecure-skip-tls-verify=true
 
-    - name: rollback deployment
-      command: oc rollout undo dc/ticket-monster-ui-error
+##################################################
+## ENABLE ORDER SERVICE WITH FEATURE TOGGLE
+##################################################
+  - name: set feature toggle to microservice
+    uri:
+      url: "{{featuretoggleurl_microservice_enable}}"
+      method: GET
+      return_content: yes
+    register: ff-microservice-response
+    tags:
+      - featuretoggle-enable-microservice
+
+  - name: set feature toggle internal to false
+    uri:
+      url: "{{featuretoggleurl_internal_disable}}"
+      method: GET
+      return_content: yes
+    tags:
+      - featuretoggle-enable-microservice
+
+  - name: update deployment information
+    uri:
+      url: "{{dtdeploymentapiurl}}"
+      method: POST
+      body_format: json
+      body: '{
+            "eventType": "CUSTOM_DEPLOYMENT",
+            "attachRules": {
+              "tagRule" : [{
+                  "meTypes" : ["SERVICE"],
+                  "tags" : [ {
+                    "context" : "CONTEXTLESS",
+                    "key" : "Service",
+                    "value" : "{{bookingservice_tag}}"            
+                  }
+                  ]
+                }]
+            },
+            "deploymentName":"Enable microservice service",
+            "deploymentVersion":"1.1",
+            "deploymentProject":"Feature toggle",
+            "remediationAction":"TODO",
+            "source":"Ansible",
+            "customProperties":{
+                "CI Tool": "Ansible Tower",
+                "Build Number": "123",
+                "Git commit": "23422323233332"
+            }
+          }'
+      return_content: yes
+    register: deploymentresponse
+    tags: featuretoggle-enable-microservice
 
 
+##################################################
+## DISABLE ORDER SERVICE WITH FEATURE TOGGLE
+##################################################
+  - name: set feature toggle to internal
+    uri:
+      url: "{{featuretoggleurl_microservice_disable}}"
+      method: GET
+      return_content: yes
+    register: ff-microservice-response
+    tags:
+      - featuretoggle-disable-microservice
+
+  - name: set feature toggle microservice to false
+    uri:
+      url: "{{featuretoggleurl_internal_enable}}"
+      method: GET
+      return_content: yes
+    tags:
+      - featuretoggle-disable-microservice
+
+  - name: update deployment information
+    uri:
+      url: "{{dtdeploymentapiurl}}"
+      method: POST
+      body_format: json
+      body: '{
+            "eventType": "CUSTOM_DEPLOYMENT",
+            "attachRules": {
+              "tagRule" : [{
+                  "meTypes" : ["SERVICE"],
+                  "tags" : [ {
+                    "context" : "CONTEXTLESS",
+                    "key" : "Service",
+                    "value" : "{{bookingservice_tag}}"            
+                  }
+                  ]
+                }]
+            },
+            "deploymentName":"Disable microservice service",
+            "deploymentVersion":"1.1",
+            "deploymentProject":"Feature toggle",
+            "remediationAction":"TODO",
+            "source":"Ansible",
+            "customProperties":{
+                "CI Tool": "Ansible Tower",
+                "Build Number": "123",
+                "Git commit": "23422323233332"
+            }
+          }'
+      return_content: yes
+    register: deploymentresponse
+    tags: 
+      - featuretoggle-disable-microservice
+
+  - name: push remediation comment to dynatrace
+    uri:
+      url: "{{dtcommentapiurl}}"
+      method: POST
+      body_format: json
+      body: "{ \"comment\": \"Remediation playbook triggered. Setting feature toggle to internal version.\", \"user\": \"{{commentuser}}\", \"context\": \"Ansible Tower\" }"
+    tags: featuretoggle-internal
+    when: state == "OPEN"
+    ignore_errors: yes
+    tags:
+      - featuretoggle-disable-microservice
 
