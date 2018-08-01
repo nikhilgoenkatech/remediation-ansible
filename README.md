@@ -78,10 +78,21 @@ Setup a problem notification in your Dynatrace tenant:
 
     ![dynatrace problem notification](./assets/dynatrace-problem-notification1.png)
 
-2. Insert credentials and job template url (copy template url from the CloudFormation template outputs)
+1. Insert credentials and job template url (copy template url from the CloudFormation template outputs)
 
     ![dynatrace problem notification](./assets/dynatrace-problem-notification2.png)
 
+1. Custom payload
+    ```
+    {
+    "State":"{State}",
+    "ProblemID":"{ProblemID}",
+    "ProblemTitle":"{ProblemTitle}",
+    "PID":"{PID}",
+    "ImpactedEntity":"{ImpactedEntity},
+    "ImpactedEntities":{ImpactedEntities}
+    }
+    ```
 
 ## Auto-remediation workflow
 
