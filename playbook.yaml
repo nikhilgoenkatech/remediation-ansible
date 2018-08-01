@@ -1,10 +1,6 @@
 ---
 - hosts: localhost
   tasks:
-
-##################################################
-## ENABLE ORDER SERVICE WITH FEATURE TOGGLE
-##################################################
   - name: set feature toggle to microservice
     uri:
       url: "{{featuretoggleurl_microservice_enable}}"
@@ -43,7 +39,7 @@
             "deploymentName":"Enable microservice service",
             "deploymentVersion":"1.1",
             "deploymentProject":"Feature toggle",
-            "remediationAction":"TODO",
+            "remediationAction":"https://ec2-18-237-192-241.us-west-2.compute.amazonaws.com/api/v2/job_templates/9/launch/",
             "source":"Ansible",
             "customProperties":{
                 "CI Tool": "Ansible Tower",
