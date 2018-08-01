@@ -2,3 +2,4 @@ notes.txt
 ansible-license.txt
 *.pem
 target
+order-service-error
