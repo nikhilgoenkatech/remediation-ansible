@@ -323,6 +323,25 @@
                   "Ref": "DynatraceAPIToken"
                 },
                 ",g' /var/lib/awx/projects/remediation/playbook.yaml \n",
+                "wget -O /var/lib/awx/projects/remediation/remediation.yaml --no-check-certificate https://s3.",
+                {
+                  "Ref": "AWS::Region"
+                },
+                ".amazonaws.com/",
+                {
+                  "Ref": "YourS3BucketName"
+                },
+                "/remediation.yaml \n",
+                "sed -i -e 's,DT_TENANT_URL,",
+                {
+                  "Ref": "DynatraceTenantURL"
+                },
+                ",g' /var/lib/awx/projects/remediation/remediation.yaml \n",
+                "sed -i -e 's,DT_API_TOKEN,",
+                {
+                  "Ref": "DynatraceAPIToken"
+                },
+                ",g' /var/lib/awx/projects/remediation/remediation.yaml \n",
                 "tower-cli config username admin\n",
                 "tower-cli config password dynatrace\n",
                 "tower-cli project create --name Remediation --scm-type manual --organization Default --local-path remediation \n",
