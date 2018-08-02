@@ -93,7 +93,6 @@
             "deploymentName":"Disable microservice service",
             "deploymentVersion":"1.1",
             "deploymentProject":"Feature toggle",
-            "remediationAction":"TODO",
             "source":"Ansible",
             "customProperties":{
                 "CI Tool": "Ansible Tower",
