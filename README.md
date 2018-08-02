@@ -10,9 +10,10 @@ The remediation scenario is as follows: Assuming we have a healthy build in prod
 
 ## Prepare our services
 
-1. add auto-tagging rule to our services: on our tenant go to `Settings -> Tags -> Automatically applied tags`.
+1. Add auto-tagging rule to our services: on our tenant go to `Settings -> Tags -> Automatically applied tags`.
     
 1. Add new rule for "Service" for services:
+
     Optional tag value:
     ```
     {ProcessGroup:KubernetesNamespace}-{ProcessGroup:KubernetesContainerName}-{Service:WebServiceName}
