@@ -22,6 +22,10 @@ The remediation scenario is as follows: Assuming we have a healthy build in prod
 1. Add a new alerting profile
     ![alerting profile](./assets/alerting-profile.png)
 
+1. Adjust the anomaly detection settings for the service under suspicion. 
+    ![anomaly detection](../assets/anomaly-detection.png)
+
+
 ## Define remediaton actions as playbook
 
 In ```playbook.yaml``` all remediation action should be defined. This will be the file that comprises all tasks that can be used for remediation.
