@@ -39,7 +39,7 @@
             "deploymentName":"Enable microservice service",
             "deploymentVersion":"1.1",
             "deploymentProject":"Feature toggle",
-            "remediationAction":"https://ec2-18-237-192-241.us-west-2.compute.amazonaws.com/api/v2/job_templates/9/launch/",
+            "remediationAction":"{{remediationaction}}",
             "source":"Ansible",
             "customProperties":{
                 "CI Tool": "Ansible Tower",
