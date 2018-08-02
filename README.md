@@ -23,7 +23,7 @@ The remediation scenario is as follows: Assuming we have a healthy build in prod
     ![alerting profile](./assets/alerting-profile.png)
 
 1. Adjust the anomaly detection settings for the service under suspicion. 
-    ![anomaly detection](../assets/anomaly-detection.png)
+    ![anomaly detection](./assets/anomaly-detection.png)
 
 
 ## Define remediaton actions as playbook
