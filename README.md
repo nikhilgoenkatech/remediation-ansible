@@ -76,8 +76,8 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
 ```
 ---
-tenantid: nbt24337
-apitoken: tJoueDAgQbWenSijKhNek
+tenantid: YOUR-TENTANT-ID
+apitoken: YOUR-API-TOKEN
 commentuser: "Ansible Playbook"
 bookingservice_tag: "ws8-backend-v*-BookingService"
 dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{PID}}/comments?Api-Token={{apitoken}}"
