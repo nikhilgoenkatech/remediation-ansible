@@ -1,6 +1,9 @@
 ---
 - hosts: localhost
   tasks:
+##################################################
+## ENABLE ORDER SERVICE WITH FEATURE TOGGLE
+##################################################
   - name: set feature toggle to microservice
     uri:
       url: "{{featuretoggleurl_microservice_enable}}"
