@@ -105,15 +105,3 @@
     tags: 
       - featuretoggle-disable-microservice
 
-  - name: push remediation comment to dynatrace
-    uri:
-      url: "{{dtcommentapiurl}}"
-      method: POST
-      body_format: json
-      body: "{ \"comment\": \"Remediation playbook triggered. Setting feature toggle to internal version.\", \"user\": \"{{commentuser}}\", \"context\": \"Ansible Tower\" }"
-    tags: featuretoggle-internal
-    when: state == "OPEN"
-    ignore_errors: yes
-    tags:
-      - featuretoggle-disable-microservice
-
