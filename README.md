@@ -92,17 +92,32 @@ featuretoggleurl_microservice_disable: "http://backend-v2-ws8.18.207.174.41.xip.
 
 ## Set up problem notification for Ansible Tower
 
+Basically, there are two options. One is to used the convenient logo integration Dynatrace provides for Ansible Tower. The other option is to use a custom integration. Both options are detailed in the next steps:
+
+### Option 1 (preferred): Use Ansible Tower integration
+
+1. Setup notification
+
+    ![dynatrace problem notification](./assets/dynatrace-problem-notification-tower.png)
+
+
+1. Insert credentials and job template url (copy template url from the CloudFormation template outputs)
+
+    ![dynatrace problem notification](./assets/dynatrace-problem-notification2.png)
+
+1. If needed, use an alerting profile.
+
+1. Send test notification and save the integration.
+
+### Option 2: Use custom integration
+
 Setup a problem notification in your Dynatrace tenant:
 
 1. Setup notification
 
     ![dynatrace problem notification](./assets/dynatrace-problem-notification1.png)
 
-<!--
-1. Insert credentials and job template url (copy template url from the CloudFormation template outputs)
 
-    ![dynatrace problem notification](./assets/dynatrace-problem-notification2.png)
--->
 1. Insert the API URL for the job template - *with* the trailing slash.
     ```
     https://YOUR-TOWER/api/v2/job_templates/YOUR-JOB-ID/launch/
@@ -112,26 +127,45 @@ Setup a problem notification in your Dynatrace tenant:
 1. Custom payload
     ```
     { "extra_vars": {
-        "State":"{State}",
-        "ProblemID":"{ProblemID}",
-        "ProblemTitle":"{ProblemTitle}",
-        "PID":"{PID}",
-        "ImpactedEntity":"{ImpactedEntity}",
-        "ImpactedEntities":{ImpactedEntities}
+        "state":"{State}",
+        "problemID":"{ProblemID}",
+        "problemTitle":"{ProblemTitle}",
+        "pid":"{PID}",
+        "impactedEntity":"{ImpactedEntity}",
+        "impactedEntities":{ImpactedEntities}
         }
     }
     ```
 
-1.  Set the alerting profile to your own service/namespace.
+1.  If needed, set the alerting profile to your own service/namespace.
+
+1. Send test notification and save integration.
 
 ## Auto-remediation workflow
 
+1. Make sure the feature flags are set to the correct starting position for this demo, i.e., they are set to the internal orderservice only.
+
+    ![ff4j](./assets/ff4j.png)
 
 
-### Deploy load generator
+1. Start the load generator script that creates a booking every second by making a HTTP post request to the booking service endpoint.
 
+    ```
+    ./generate-bookings.sh
+    ```
 
+1. In your Ansible Tower, run the `enable microservice` job template.
+    
+    ![enable microservice](./assets/enable-microservice.png)
+
+1. Wait for Dynatrace to detect the problem.
+
+1. Dynatrace will send a notification to Ansible Tower which will then start the remediation by switching the feature flags. (This should be quite fast)
+
+1. After a couple of minutes the problem is resolved. (This takes a while for Dynatrace to close the problem)
+
+<!--
 ### See auto-remediation in action
 
 watch and see
-
+-->
