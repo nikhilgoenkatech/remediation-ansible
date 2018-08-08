@@ -80,7 +80,7 @@ tenantid: YOUR-TENTANT-ID
 apitoken: YOUR-API-TOKEN
 commentuser: "Ansible Playbook"
 bookingservice_tag: "ws8-backend-v*-BookingService"
-dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{PID}}/comments?Api-Token={{apitoken}}"
+dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
 dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
 remediationaction: "https://tower-url/api/v2/job_templates/9/launch/"
 featuretoggleurl_internal_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-internal"
