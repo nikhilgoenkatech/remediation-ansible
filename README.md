@@ -130,7 +130,7 @@ Setup a problem notification in your Dynatrace tenant:
         "state":"{State}",
         "problemID":"{ProblemID}",
         "problemTitle":"{ProblemTitle}",
-        "pid":"{PID}",
+        "pid":"{pid}",
         "impactedEntity":"{ImpactedEntity}",
         "impactedEntities":{ImpactedEntities}
         }
