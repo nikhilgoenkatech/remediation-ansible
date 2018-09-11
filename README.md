@@ -118,7 +118,7 @@ Basically, there are two options. One is to used the convenient logo integration
 1. Send test notification and save the integration.
 
 ### Option 2: Use custom integration
-<details><summary>Click to open instructions</summary>
+<details><summary>If you choose to do a custom integration instead of the integration suggested in Option 1, click here.</summary>
 Setup a problem notification in your Dynatrace tenant:
 
 1. Setup notification
