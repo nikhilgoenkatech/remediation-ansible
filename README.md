@@ -63,7 +63,7 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
     ![cloudformation output](./assets/cloudformation-outputs.png)
 
-1. Navigate to your Ansible Tower instance
+1. Navigate to your Ansible Tower instance (might take a couple of minutes to show up correctly in your browser)
 1. Login with the demo credentials: admin / dynatrace
 1. Verify the setup:
 
