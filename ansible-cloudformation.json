@@ -13,7 +13,7 @@
       "MinLength": "21"
     },
     "WorkshopPrefix": {
-      "Description": "Prefix",
+      "Description": "Prefix for AWS resources to avoid conflicts, e.g., your workshop number",
       "Type": "String",
       "MinLength": 2
     },
