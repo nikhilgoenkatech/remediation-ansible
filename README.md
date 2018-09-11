@@ -31,7 +31,7 @@ The remediation scenario is as follows: Assuming we have a healthy build in prod
 
 In ```playbook.yaml``` all remediation action should be defined. This will be the file that comprises all tasks that can be used for remediation.
 
-## Execute remediation actions locally
+## Optional: Execute remediation actions locally
 
 Test the remediation actions locally with Ansible installed.
 ```
@@ -74,12 +74,20 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
 ## Create inventory in Ansible Tower
 
+Make sure to replace the placeholders with your own project specific values:
+- YOUR-TENANT-ID
+- YOUR-API-TOKEN
+- XX ... your workshop project number
+- PROJECT.YOURURL ... eg., ws-21.127.0.0.1.xip.io
+
+Please double check the value of `remedationaction`: number 9 should be the default value, please check if in your environment it is set to 9 or any other value and adjust this accordingly.
+
 ```
 ---
 tenantid: YOUR-TENTANT-ID
 apitoken: YOUR-API-TOKEN
 commentuser: "Ansible Playbook"
-bookingservice_tag: "ws8-backend-v*-BookingService"
+bookingservice_tag: "wsXX-backend-v*-BookingService"
 dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
 dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
 remediationaction: "https://tower-url/api/v2/job_templates/9/launch/"
@@ -110,7 +118,7 @@ Basically, there are two options. One is to used the convenient logo integration
 1. Send test notification and save the integration.
 
 ### Option 2: Use custom integration
-
+<details><summary>Click to open instructions</summary>
 Setup a problem notification in your Dynatrace tenant:
 
 1. Setup notification
@@ -140,6 +148,7 @@ Setup a problem notification in your Dynatrace tenant:
 1.  If needed, set the alerting profile to your own service/namespace.
 
 1. Send test notification and save integration.
+</details>
 
 ## Auto-remediation workflow
 
