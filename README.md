@@ -82,20 +82,20 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 1. Navigate to "Inventories" and edit the "Demo Inventory".
 1. Copy the following snippet to the "variables" section:
     ```
----
-tenantid: "xxx"
-apitoken: "xxx"
-towerurl: "https://yoururl.compute.amazonaws.com"
-backendurl: "http://backend-v2-wsXX.xxx.xip.io"
-commentuser: "Ansible Playbook"
-bookingservice_tag: "wsXX-backend-v*-BookingService"
-dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
-dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
-remediationaction: "{{towerurl}}/api/v2/job_templates/9/launch/"
-featuretoggleurl_internal_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-internal"
-featuretoggleurl_internal_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-internal"
-featuretoggleurl_microservice_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-service"
-featuretoggleurl_microservice_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-service"
+    ---
+    tenantid: "xxx"
+    apitoken: "xxx"
+    towerurl: "https://yoururl.compute.amazonaws.com"
+    backendurl: "http://backend-v2-wsXX.xxx.xip.io"
+    commentuser: "Ansible Playbook"
+    bookingservice_tag: "wsXX-backend-v*-BookingService"
+    dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
+    dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
+    remediationaction: "{{towerurl}}/api/v2/job_templates/9/launch/"
+    featuretoggleurl_internal_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-internal"
+    featuretoggleurl_internal_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-internal"
+    featuretoggleurl_microservice_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-service"
+    featuretoggleurl_microservice_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-service"
     ```
 
 
