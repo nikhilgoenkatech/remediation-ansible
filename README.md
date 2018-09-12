@@ -82,28 +82,13 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 1. Navigate to "Inventories" and edit the "Demo Inventory".
 1. Copy the following snippet to the "variables" section:
     ```
-    ---
-    tenantid: YOUR-TENTANT-ID
-    apitoken: YOUR-API-TOKEN
-    commentuser: "Ansible Playbook"
-    bookingservice_tag: "wsXX-backend-v*-BookingService"
-    dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
-    dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
-    remediationaction: "https://tower-url/api/v2/job_templates/9/launch/"
-    featuretoggleurl_internal_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-internal"
-    featuretoggleurl_internal_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-internal"
-    featuretoggleurl_microservice_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-service"
-    featuretoggleurl_microservice_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-service"
-    ```
-
-
 ---
-tenantid: "nbt24337"
-apitoken: "8F0G3x7HQSmgxrRz7b9n-"
-towerurl: "https://ec2-34-217-84-219.us-west-2.compute.amazonaws.com"
-backendurl: "http://backend-v2-ws25.18.207.174.41.xip.io"
+tenantid: "xxx"
+apitoken: "xxx"
+towerurl: "https://yoururl.compute.amazonaws.com"
+backendurl: "http://backend-v2-wsXX.xxx.xip.io"
 commentuser: "Ansible Playbook"
-bookingservice_tag: "ws25-backend-v*-BookingService"
+bookingservice_tag: "wsXX-backend-v*-BookingService"
 dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
 dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
 remediationaction: "{{towerurl}}/api/v2/job_templates/9/launch/"
@@ -111,13 +96,19 @@ featuretoggleurl_internal_enable: "{{backendurl}}/ff4j-console?op=enable&uid=ord
 featuretoggleurl_internal_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-internal"
 featuretoggleurl_microservice_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-service"
 featuretoggleurl_microservice_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-service"
+    ```
+
+
+
 
 
     Make sure to replace the placeholders with your own project specific values:
-    - YOUR-TENANT-ID
-    - YOUR-API-TOKEN
-    - XX ... your workshop project number
-    - PROJECT.YOURURL ... eg., ws-21.127.0.0.1.xip.io
+    - tenantid
+    - apitoken
+    - towerurl
+    - backendurl
+    - bookingservice_tag
+    - remediationaction
 
     Please double check the value of `remedationaction`: number 9 should be the default value, please check if in your environment it is set to 9 or any other value and adjust this accordingly.
 1. Save
