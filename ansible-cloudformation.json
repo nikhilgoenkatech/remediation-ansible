@@ -345,7 +345,7 @@
                 "tower-cli config username admin\n",
                 "tower-cli config password dynatrace\n",
                 "tower-cli project create --name Remediation --scm-type manual --organization Default --local-path remediation \n",
-                "tower-cli job_template create --name deployment-rollback --project Remediation --playbook playbook.yaml --job-type run --credential 1 --inventory 1 --ask-variables-on-launch true"
+                "tower-cli job_template create --name deployment-rollback --project Remediation --playbook remediation.yaml --job-type run --credential 1 --inventory 1 --ask-variables-on-launch true"
               ]
             ]
           }
