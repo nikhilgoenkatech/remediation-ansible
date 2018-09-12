@@ -95,6 +95,24 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
     featuretoggleurl_microservice_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-service"
     featuretoggleurl_microservice_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-service"
     ```
+
+
+---
+tenantid: "nbt24337"
+apitoken: "8F0G3x7HQSmgxrRz7b9n-"
+towerurl: "https://ec2-34-217-84-219.us-west-2.compute.amazonaws.com"
+backendurl: "http://backend-v2-ws25.18.207.174.41.xip.io"
+commentuser: "Ansible Playbook"
+bookingservice_tag: "ws25-backend-v*-BookingService"
+dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
+dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
+remediationaction: "{{towerurl}}/api/v2/job_templates/9/launch/"
+featuretoggleurl_internal_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-internal"
+featuretoggleurl_internal_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-internal"
+featuretoggleurl_microservice_enable: "{{backendurl}}/ff4j-console?op=enable&uid=orders-service"
+featuretoggleurl_microservice_disable: "{{backendurl}}/ff4j-console?op=disable&uid=orders-service"
+
+
     Make sure to replace the placeholders with your own project specific values:
     - YOUR-TENANT-ID
     - YOUR-API-TOKEN
@@ -181,7 +199,7 @@ Setup a problem notification in your Dynatrace tenant:
 
 ## Auto-remediation workflow
 
-1. Make sure the feature flags are set to the correct starting position for this demo, i.e., they are set to the internal orderservice only.
+1. Make sure the feature flags are set to the correct starting position for this demo, i.e., they are set to the internal orderservice only. If not, just execute the `disable microservice` job in your Ansible Tower or manually switch the toggles to the correct starting position.
 
     ![ff4j](./assets/ff4j.png)
 
@@ -203,7 +221,18 @@ Setup a problem notification in your Dynatrace tenant:
 1. After a couple of minutes the problem is resolved. (This takes a while for Dynatrace to close the problem)
 
 ## What happens behind the scenes in this demo
-- When 
+- When firing the `enable microservice` job in Ansible Tower, it will run all tasks tagged with `featuretoogle-enable-microservice` in the `playbook.yaml` file. This switches the feature toggle for internal to `false` and the one for the microservice to `true`. It also sends a deployment event to Dynatrace so you see there was a change.
+![deploymentevent](./assets/deploymentevents.png) 
+- When hitting the service with some load, Dynatrace will detect that the service is not behaving correclty due to an increased failure rate.
+- That causes Dynatrace to fire a problem and will send a problem notification to the configured Ansible Tower.
+- Ansible Tower will start the `remediation.yaml` playbook, which essentially does the following:
+    - Pushing a comment to the Dynatrace problem that the playbook was started and a remediation workflow now kicks in.
+    - Fetching all custom deployment events assigned to the entities of this problem.
+    - Getting the most recent deployment event and looking for a remediation action.
+    - Calling this remediation action - in our case it's switching back the feature toggle to route traffic to the internal booking method.
+    - Pushing a comment to Dynatrace if the action was executed succesfully or not.
+- The problem should now be remediated.
+- Dynatrace will close the problem after a couple of minutes.
 
 
 
@@ -215,4 +244,4 @@ watch and see
 
 # Troubleshooting
 - Ansible Tower: if you can't login to Ansible Tower make sure you have set our S3 bucket to public. Then delete the Cloudformation template and start again.
-- 
+- If you have the `generate-bookings.sh` running for a long time, periodically check in your Ticket Monster application in the "Monitor" section if there are still tickets available (the default venue only allows 2000 tickets). You can always delete all bookings to make sure new bookings won't fail.
