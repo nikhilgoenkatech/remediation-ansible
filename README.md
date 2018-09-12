@@ -8,6 +8,10 @@ This repo builds upon the [monolith-to-microservices on OpenShift](https://githu
 The remediation scenario is as follows: Assuming we have a healthy build in production (tm-ui-v2, backend-v2, orders-service) we are switching the *feature flag* to route new traffic to the new orders-service. In our demo, the orders service will slow down the booking process. Rolling back the service won't solve the issue, instead we have to turn of the feature flag. This will be automatically done by the *remediaton action* link in the deployment description for enabling the feature flag. Please note that enabling the feature flag has to be done via a deployment to let Dyntrace know of this action.
 
 
+## Prerequisites
+
+Get your free Ansible Tower license here: [Ansible license](https://www.ansible.com/license) with limited features up to 10 nodes is sufficient.
+
 ## Prepare our services
 
 1. Add auto-tagging rule to our services: on our tenant go to `Settings -> Tags -> Automatically applied tags`.
@@ -63,7 +67,8 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
     ![cloudformation output](./assets/cloudformation-outputs.png)
 
-1. Navigate to your Ansible Tower instance (might take a couple of minutes to show up correctly in your browser)
+1. Navigate to your Ansible Tower instance by clicking on the link (might take a couple of minutes to show up correctly in your browser - please be patient!)
+    _Why does it take so long?_ Because there a several things going on: installing the OneAgente on this host, setting the correct login information for Ansible Tower, downloading all scripts for the remedation for this lab, ...
 1. Login with the demo credentials: admin / dynatrace
 1. Verify the setup:
 
@@ -74,28 +79,52 @@ Set up Ansible Tower with the `ansible-cloudformation.json` file on AWS infrastr
 
 ## Create inventory in Ansible Tower
 
-Make sure to replace the placeholders with your own project specific values:
-- YOUR-TENANT-ID
-- YOUR-API-TOKEN
-- XX ... your workshop project number
-- PROJECT.YOURURL ... eg., ws-21.127.0.0.1.xip.io
+1. Navigate to "Inventories" and edit the "Demo Inventory".
+1. Copy the following snippet to the "variables" section:
+    ```
+    ---
+    tenantid: YOUR-TENTANT-ID
+    apitoken: YOUR-API-TOKEN
+    commentuser: "Ansible Playbook"
+    bookingservice_tag: "wsXX-backend-v*-BookingService"
+    dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
+    dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
+    remediationaction: "https://tower-url/api/v2/job_templates/9/launch/"
+    featuretoggleurl_internal_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-internal"
+    featuretoggleurl_internal_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-internal"
+    featuretoggleurl_microservice_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-service"
+    featuretoggleurl_microservice_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-service"
+    ```
+    Make sure to replace the placeholders with your own project specific values:
+    - YOUR-TENANT-ID
+    - YOUR-API-TOKEN
+    - XX ... your workshop project number
+    - PROJECT.YOURURL ... eg., ws-21.127.0.0.1.xip.io
 
-Please double check the value of `remedationaction`: number 9 should be the default value, please check if in your environment it is set to 9 or any other value and adjust this accordingly.
+    Please double check the value of `remedationaction`: number 9 should be the default value, please check if in your environment it is set to 9 or any other value and adjust this accordingly.
+1. Save
 
-```
----
-tenantid: YOUR-TENTANT-ID
-apitoken: YOUR-API-TOKEN
-commentuser: "Ansible Playbook"
-bookingservice_tag: "wsXX-backend-v*-BookingService"
-dtcommentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
-dtdeploymentapiurl: "https://{{tenantid}}.live.dynatrace.com/api/v1/events/?Api-Token={{apitoken}}"
-remediationaction: "https://tower-url/api/v2/job_templates/9/launch/"
-featuretoggleurl_internal_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-internal"
-featuretoggleurl_internal_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-internal"
-featuretoggleurl_microservice_enable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=enable&uid=orders-service"
-featuretoggleurl_microservice_disable: "http://backend-v2-PROJECT.YOURURL/ff4j-console?op=disable&uid=orders-service"
-```
+
+
+## Create job templates for the playbooks
+### Job template for "Enable orders microservice"
+1. Navigate to "Templates" and click "+Add" -> "Job Template"
+1. Name it "Enable orders microservice"
+1. Select the demo inventory by clicking on the magnifier next to "Inventory"
+1. Select the "remediation" project
+1. For the playbook, select the "playbook.yaml" --> if you don't see the playbook.yaml here, make sure your S3 bucket is set to public, delete the cloudformation stack and create it again.
+1. Select the demo credentials (they are not needed but credentials have to be defined)
+1. For "job tags" insert: `featuretoggle-enable-microservice` and make sure to hit enter to have it inserted as a tag
+1. Check the "prompt on launch" checkbox for "Extra variables"
+1. Save
+
+### Job template for "Disable orders microservice"
+1. Copy the job template "Enable orders microservice"
+1. Rename the job template to "Disable orders microservice"
+1. Remove the tag `featuretoggle-enable-microservice` from the job tags
+1. Insert the tag `featuretoggle-disable-microservice` to the job tags  
+
+
 
 
 ## Set up problem notification for Ansible Tower
@@ -157,7 +186,7 @@ Setup a problem notification in your Dynatrace tenant:
     ![ff4j](./assets/ff4j.png)
 
 
-1. Start the load generator script that creates a booking every second by making a HTTP post request to the booking service endpoint.
+1. Start the load generator script that creates a booking every second by making a HTTP post request to the booking service endpoint. Make sure to adjust the script to *call YOUR API endpoint*! (Therefore, edit the URL in the script `generate-bookings.sh`)
 
     ```
     ./generate-bookings.sh
@@ -173,8 +202,17 @@ Setup a problem notification in your Dynatrace tenant:
 
 1. After a couple of minutes the problem is resolved. (This takes a while for Dynatrace to close the problem)
 
+## What happens behind the scenes in this demo
+- When 
+
+
+
 <!--
 ### See auto-remediation in action
 
 watch and see
 -->
+
+# Troubleshooting
+- Ansible Tower: if you can't login to Ansible Tower make sure you have set our S3 bucket to public. Then delete the Cloudformation template and start again.
+- 
