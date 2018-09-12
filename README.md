@@ -222,6 +222,7 @@ Setup a problem notification in your Dynatrace tenant:
     - Getting the most recent deployment event and looking for a remediation action.
     - Calling this remediation action - in our case it's switching back the feature toggle to route traffic to the internal booking method.
     - Pushing a comment to Dynatrace if the action was executed succesfully or not.
+    ![comments](./assets/comments.png)
 - The problem should now be remediated.
 - Dynatrace will close the problem after a couple of minutes.
 
