@@ -1,5 +1,10 @@
 #!/bin/bash
 echo "Press [CTRL+C] to stop.."
+
+# delete all bookings so far
+ curl -X PUT -H "Content-Type: application/json" -d "\"RESET\"" http://monolith-ticketmonster.18.194.120.69.xip.io/rest/bot/status
+sleep 1
+
 i=0
 while true
 do
