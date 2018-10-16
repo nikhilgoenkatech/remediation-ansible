@@ -2,7 +2,7 @@
 echo "Press [CTRL+C] to stop.."
 
 # delete all bookings so far
- curl -X PUT -H "Content-Type: application/json" -d "\"RESET\"" http://monolith-ticketmonster.18.194.120.69.xip.io/rest/bot/status
+ curl -X PUT -H "Content-Type: application/json" -d "\"RESET\"" http://backend-v2-ticketmonster.18.194.120.69.xip.io/rest/bot/status
 sleep 1
 
 i=0
@@ -16,7 +16,7 @@ do
   if [ $i -gt 100 ]  
   then 
     echo "delete all tickets ordered so far..."
-    curl -X PUT -H "Content-Type: application/json" -d "\"RESET\"" http://monolith-ticketmonster.18.194.120.69.xip.io/rest/bot/status
+    curl -X PUT -H "Content-Type: application/json" -d "\"RESET\"" http://backend-v2-ticketmonster.18.194.120.69.xip.io/rest/bot/status
     let i=0
   fi
   sleep 1
