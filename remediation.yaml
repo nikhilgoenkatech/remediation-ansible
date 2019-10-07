@@ -1,0 +1,91 @@
+---
+- name: autoremediaton playbook
+  hosts: localhost
+  vars:
+    #tenanturl: https://xxx.live.dynatrace.com
+    #apitoken: xxx
+    now: "{{ ansible_date_time.epoch|int * 1000}}"
+    past: "{{ now|int - 86400000 }}" # 1h = 3600000   24h = 86400000
+    #commentuser: "Ansible Playbook"
+    #dtcommentapiurl: "{{tenanturl}}/api/v1/problem/details/{{pid}}/comments?Api-Token={{apitoken}}"
+    #dtdeploymentapiurl: "{{tenanturl}}/api/v1/events/?eventType=CUSTOM_DEPLOYMENT&from={{past}}&to={{now}}&Api-Token={{apitoken}}"
+    payload:
+      #PID: "{{pid}}"
+      #ImpactedEntities: "{{impactedEntities}}"
+      #State: "{{state}}"
+
+# when triggered by dynatrace problem notification
+# 1. receive event
+# 2. parse deployment events
+# 3. fetch last deployment
+# 4. call remediation action of deployment
+#    which does the following
+#     1. comment on Dynatrace problem ID to take over action
+#     2. disable microservice (toggle feature flag)
+#     3. enable backend service (toggle feature flag)
+#     4. send deployment event to dynatrace
+#     5. comment on Dyntrace problem ID
+
+  tasks:
+    - name: push comment to dynatrace
+      uri:
+        url: "{{dtcommentapiurl}}"
+        method: POST
+        body_format: json
+        body: "{ \"comment\": \"Remediation playbook started.\", \"user\": \"{{commentuser}}\", \"context\": \"Ansible Tower\" }"
+      when: state == "OPEN"
+
+
+    - name: fetch custom deployment events
+      uri:
+        url: "{{dtdeploymentapiurl}}"
+        return_content: yes
+      with_items: "{{ impactedEntities }}"
+      when: state == "OPEN"
+      register: customproperties
+      ignore_errors: no
+
+    - name: parse deployment events
+      when: state == "OPEN"
+      set_fact:
+        deployment_events: "{{item.json.events}}"
+      with_items: "{{ customproperties.results }}"
+      register: app_result
+
+    - name: get most recent deployment
+      when: state == "OPEN"
+      set_fact:
+        myItem: "{{ deployment_events | first }}"
+
+    - name: call remediation action
+      uri:
+        url: "{{ myItem.remediationAction }}"
+        method: POST
+        #body_format: json
+        #body: "{{ payload | to_json }}"
+        user: admin
+        password: dynatrace
+        force_basic_auth: yes
+        status_code: [200,201,202]
+        validate_certs: no
+        return_content: yes
+      when: state == "OPEN"
+      ignore_errors: yes
+      register: result
+
+    - name: push success comment to dynatrace
+      uri:
+        url: "{{dtcommentapiurl}}"
+        method: POST
+        body_format: json
+        body: "{ \"comment\": \"Invoked remediation action successfully executed.\", \"user\": \"{{commentuser}}\", \"context\": \"Ansible Tower\" }"
+      when: state == "OPEN" and (result.status == 200 or result.status == 201 or result.status == 202)
+
+    - name: push error comment to dynatrace
+      uri:
+        url: "{{dtcommentapiurl}}"
+        method: POST
+        body_format: json
+        body: "{ \"comment\": \"Invoked remediation action failed. \", \"user\": \"{{commentuser}}\", \"context\": \"Ansible Tower\" }"
+      when: state == "OPEN" and (result.status != 200 and result.status != 201 and result.status != 202)
+      
